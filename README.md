@@ -1,2 +1,6 @@
 # Microphonics_tab
 This is a pydm widget to run the microphonics script and then plot short runs for one cavity.
+The four files uploaded are the main pydm file CommMicro.py (commissioning Microphonics) which is executed using the command 'pydm CommMicro.py'.  The main widget display is  "FFT_Test.ui" which shows the User inputs.  The User selects the length of the data acq, the cryomodule selected and a cavity.  For commissioning the interface only allows one cavity at a time, but the resonance chassis are capable of taking data for all 8 cavities simultaneously.  
+The pull down menu allows the User to select how to display the data; either as a waterfall or fft. The data is displayed on the second display "MicPlot.ui". For longer acquisitions, where the files are much larger, no plot is given as an option to reduce loading of control computers.  
+Currently the getdata function is nerfed and reads an existing file to generate the data sets.  This will be corrected once the code is verified to work with the installed resonance chassis.  This file was too large to load on GitHub.  Contact me for a copy.  
+The FFt_math.py file has some of the math and file handling functions, but I didn't do a great job separating these from the plot functions.  
