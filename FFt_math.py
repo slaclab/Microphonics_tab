@@ -52,8 +52,8 @@ def dummyFileCreator(pathToDatafile):
     for i in range(len(Header)):
         f.write(str(Header[i]))
     cavDat1, cavDat2,cavDat3, cavDat4 = parseCavDat(data)
-    for i in range(len(cavDat2)):
-        f.write(str(cavDat2[i])+"\n")
+    for i in range(len(cavDat1)):
+        f.write(str(cavDa1[i])+"\n")
     f.close()    
     return 
 
