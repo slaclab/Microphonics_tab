@@ -27,3 +27,5 @@ a 'microphonics' directory with sub-directories for every cavity for you to use:
 > ACCL_L3B_1680_20210624_202608_microphonics.dat 
   
 The FFt_math.py file has some of the math and file handling functions to separate them from the display and User interface.
+  
+  8/6/21  Fixed "36" to "35" on combo box selector for module.
