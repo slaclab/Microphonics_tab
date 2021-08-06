@@ -96,7 +96,7 @@
          <item>
           <widget class="QLabel" name="label_2">
            <property name="text">
-            <string>Module 1 to 36 to measure</string>
+            <string>Module 1 to 35 to measure</string>
            </property>
           </widget>
          </item>
