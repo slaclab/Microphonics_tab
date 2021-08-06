@@ -107,9 +107,13 @@ class MicDisp(Display):
         global count
 
         liNac, cmNumSt, cavNumA, cavNumB = self.getUserVal()    # This gets the User inputs from the spinBox and checkboxes
-#                                                               # cmNumSt is a string of the cm number. cavNumA & B are strings of cavities chec$
+        cavity = cavNumA + cavNumB 
+#        print(lastPath[45:47],lastPath[47:48])                                                       # cmNumSt is a string of the cm number. cavNumA & B are strings of cavities chec$
+        if lastPath[45:47]==cmNumSt and lastPath[47:48]== cavity[0:1]:
 
-        if (len(cavNumA)+len(cavNumB))==2:                      # If sum of len of cavity num strings is 2, one of the strings has a cavity numb$
+            self.getDataBack(ac)
+            
+        elif (len(cavNumA)+len(cavNumB))==2:                             # If sum of len of cavity num strings is 2, one of the strings has a cavity numb$
 
             timMeas = self.ui.spinBox.value()  # Get time for measurement from spinBox
             count=timMeas+30
