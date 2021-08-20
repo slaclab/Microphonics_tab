@@ -29,7 +29,7 @@ class MplCanvas(FigureCanvasQTAgg):
 
 class MicDisp(Display):
 
-    def __init__(self, parent=None, args=None, ui_filename="FFT_test.ui"):
+    def __init__(self, parent=None, args=None, ui_filename="FFT_test2.ui"):
         super(MicDisp, self).__init__(parent=parent, args=args, ui_filename=ui_filename)
         self.pathHere = path.dirname(sys.modules[self.__module__].__file__)
         def getPath(fileName):
@@ -107,13 +107,14 @@ class MicDisp(Display):
         global count
 
         liNac, cmNumSt, cavNumA, cavNumB = self.getUserVal()    # This gets the User inputs from the spinBox and checkboxes
+#                                                               # cmNumSt is a string of the cm number. cavNumA & B are strings of cavities chec$
         cavity = cavNumA + cavNumB 
 #        print(lastPath[45:47],lastPath[47:48])                                                       # cmNumSt is a string of the cm number. cavNumA & B are strings of cavities chec$
         if lastPath[45:47]==cmNumSt and lastPath[47:48]== cavity[0:1]:
 
             self.getDataBack(ac)
             
-        elif (len(cavNumA)+len(cavNumB))==2:                             # If sum of len of cavity num strings is 2, one of the strings has a cavity numb$
+        elif (len(cavNumA)+len(cavNumB))==2:                      # If sum of len of cavity num strings is 2, one of the strings has a cavity numb$
 
             timMeas = self.ui.spinBox.value()  # Get time for measurement from spinBox
             count=timMeas+30
@@ -137,34 +138,37 @@ class MicDisp(Display):
 
             numbWaveF= str(int(timMeas//8)+(timMeas % 8 > 0))
 
-            cmdList= ["python",resScrptSrce,"-D",lastPath,"-a",caCmd,"-wsp","2","-acav",cavNumA,"-ch","DF", "-c", numbWaveF]
+            cmdList= ["python",'-u',resScrptSrce,"-D",lastPath,"-a",caCmd,"-wsp","2","-acav",cavNumA,"-ch","DF", "-c", numbWaveF]
 #            print(cmdList)
-
-            FFt_math.dummyFileCreator(lastPath)
-            cmd=["python","Testy2.py"]
             self.ui.AcqProg.setText('Task started')
+            FFt_math.dummyFileCreator(lastPath)
+            cmd=['python','-u','Testy2.py']
+
             try:
                 
-                process = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=False)
-                # for line in process.stdout:
-                #     print (line.strip())
-                out, err = process.communicate()
+                process = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, bufsize=1, shell=False)
+                while True:
+                    output = process.stdout.readline().decode()
+                    if output == '' and process.poll() is not None:
+                        break
+                    if output !='':
+                        self.ui.AcqProg.setText(output)
+                        print(output)
+
                 return_code = process.poll()
-                out = out.decode(sys.stdin.encoding)
-                err = err.decode(sys.stdin.encoding)
-                print(out, return_code)
+#                 print('return code is',return_code, 'and err is',err)
                 if return_code==0:
                     self.ui.AcqProg.setText("File saved at "+lastPath)
                     self.getDataBack(ac)
                 if return_code !=0:
             #        print(err)
-                    e = subprocess.CalledProcessError(return_code, cmd, output=out)
-                    e.stdout, e.stderr = out, err
+                    e = subprocess.CalledProcessError(return_code, cmd)
+#                    e.stdout, e.stderr = err
                     self.ui.AcqProg.setText("Call to microphonics script failed \n"+str(e))
 
                     
             except:
-                print("Call to microphonics script failed \n",err)  
+                self.ui.AcqProg.setText("Call to the microphonics script failed \n")  
               
         elif (len(cavNumA) + len(cavNumB)) > 2:  
             self.ui.AcqProg.setText("Only one cavity can be selected. \nTry again")
@@ -193,9 +197,9 @@ class MicDisp(Display):
             dFDat, throwAway = FFt_math.readCavDat(FilePlusPath)
             cavDat1,cavDat2,cavDat3,cavDat4 = FFt_math.parseCavDat(dFDat)
 #        print("dirs=",dirs)
-        print(cavDat1)
+#        print(cavDat1)
         indexPlot = self.ui.comboBox.currentIndex()
-        print(indexPlot)        
+#        print(indexPlot)        
 
         if indexPlot ==1:
                 leGend=[]
