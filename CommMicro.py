@@ -139,16 +139,18 @@ class MicDisp(Display):
                 if cavNumA != '':
                     botPath = botPath+cavNumA[0]+"0/"+botPath+cavNumA[0]+"0_"+s1
                     caCmd = "ca://ACCL:"+liNac+":"+str(cmNumSt)+"00:RESA:"
+                    cavNums=cavNumA
 
                 if cavNumB != '':
                    botPath = botPath+cavNumB[0]+"0/"+botPath+cavNumB[0]+"0_"+s1
                    caCmd = str("ca://ACCL:"+liNac+":"+str(cmNumSt)+"00:RESB:")
+                   cavNums=cavNumA
 
                 lastPath =  path.join(morPath, botPath)
                 makedirs(lastPath, exist_ok=True)
 
                 numbWaveF= str(int(timMeas//8)+(timMeas % 8 > 0))
-                cmdList= ['python',resScrptSrce,'-D',str(lastPath),'-a',caCmd,'-wsp','2','-acav',str(cavNumA),'-ch','DF','-c',numbWaveF]
+                cmdList= ['python',resScrptSrce,'-D',str(lastPath),'-a',caCmd,'-wsp','2','-acav',str(cavNums),'-ch','DF','-c',numbWaveF]
 #            print(cmdList)
 
 #            FFt_math.dummyFileCreator(lastPath)
