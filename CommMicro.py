@@ -144,7 +144,7 @@ class MicDisp(Display):
                 if cavNumB != '':
                    botPath = botPath+cavNumB[0]+"0/"+botPath+cavNumB[0]+"0_"+s1
                    caCmd = str("ca://ACCL:"+liNac+":"+str(cmNumSt)+"00:RESB:")
-                   cavNums=cavNumA
+                   cavNums=cavNumB
 
                 lastPath =  path.join(morPath, botPath)
                 makedirs(lastPath, exist_ok=True)
