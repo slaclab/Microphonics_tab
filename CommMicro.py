@@ -9,7 +9,7 @@ from pydm import Display
 from PyQt5.QtGui import QStandardItem
 from PyQt5.QtWidgets import (QWidgetItem, QCheckBox, QPushButton, QLineEdit,
                              QGroupBox, QHBoxLayout, QMessageBox, QWidget,
-                             QLabel, QFrame, QComboBox, QRadioButton)
+                         QLabel, QFrame, QComboBox, QRadioButton,QFileDialog)
 from os import path, pardir, makedirs
 from os import listdir
 import subprocess
@@ -22,6 +22,8 @@ from scipy.fftpack import fft, fftfreq
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg
 import matplotlib.pyplot as plt
 from matplotlib.figure import Figure
+
+# FFt_math has utility functions
 import FFt_math
 
 LASTPATH=''
@@ -46,8 +48,14 @@ class MicDisp(Display):
         self.pathHere = path.dirname(sys.modules[self.__module__].__file__)
         def getPath(fileName):
             return path.join(self.pathHere, fileName)
-        self.xfDisp = Display(ui_filename=getPath("MicPlot.ui"))  
+
+        # link up to the secondary display
+        self.xfDisp = Display(ui_filename=getPath("MicPlot.ui"))
+
+        # Show message on gui
         self.ui.AcqProg.setText("Select 1 CM and 1 cavity at a time for commissioning. \nLimit plotted waveforms to 30 sec.")         
+
+        # create plot canvases and link to GUI elements
         TopPlot = MplCanvas(self, width = 20, height =40, dpi=100)
         BotPlot = MplCanvas(self, width = 20, height =40, dpi=100)
         self.xfDisp.ui.PlotTop.addWidget(TopPlot)
@@ -59,51 +67,48 @@ class MicDisp(Display):
         # call function getOldData when OldDatBut is pressed
         self.ui.OldDatBut.clicked.connect(partial(self.getOldData,TopPlot,BotPlot))  
 
-# get CM IDs from FFt_math
+        # get CM IDs from FFt_math
         self.CM_IDs=FFt_math.CM_IDs()
 
-# fill combo boxes
+        # fill combo boxes
         for cmid in self.CM_IDs:
           self.ui.CMComboBox.addItem(cmid)
         for cavnum in range(8):
           self.ui.CavComboBox.addItem(str(cavnum+1))
 
-    def FFTPlot(self, ac,cavUno):   
+
+# This function takes given data (cavUno) and axis handle (tPlot) and calculates FFT and plots
+    def FFTPlot(self, bPlot,cavUno):   
+
         N = len(cavUno)
         T = 1.0/1000 
-#        x = np.linspace(0.0, N*T, N, endpoint=False)
-#        y = np.sin(50.0 * 2.0*np.pi*x) + 0.5*np.sin(80.0 * 2.0*np.pi*x)
         yf1 = fft(cavUno)
         xf = fftfreq(N, T)[:N//2]
-        ac.axes.plot(xf, 2.0/N * np.abs(yf1[0:N//2]))
+        bPlot.axes.plot(xf, 2.0/N * np.abs(yf1[0:N//2]))
 
-        
-#    def showTime(self,ac):
-#        global count
-#        count = count +30
-#        self.ui.AcqProg.setText("Data Acquisition started. "+str(count)+" sec left.")	# decrementing the counter
-#        count -= 1
-#        if count<0:
-#            self.timer.stop()
-#        return      
+# This function gets info from the GUI, fills out LASTPATH, 
+#  and returns liNac, cmNumStr, cavNumA, cavNumB
 
     def getUserVal(self):
-# I don't get why I need the global declaration
+        # I don't get why I need the global declaration
         global LASTPATH
 
         cavNumA=''
         cavNumB=''
-#        cmNum = self.ui.spinBox_2.value()  # Get Cryomodule number from spinBox_2
+
+        # get CM id from comboBox
         cmid=self.ui.CMComboBox.currentText()
 
-# grab the LxB part
+        # grab the LxB part
         liNac=cmid.split(':')[1]
 
-# grab the CM number
+        # grab the CM number
         cmNumStr=cmid.split(':')[2]
-                                                                 
-# only 1 cavity at a time for now, space at end for Bob
+
+        # only 1 cavity at a time for now, space at end for Bob
         cavNumStr=self.ui.CavComboBox.currentText()+' '
+
+        # A & B refer to the racks, used in the data acq command
         if int(cavNumStr) <5:
           cavNumA=cavNumStr
           cavNumB=''
@@ -111,143 +116,158 @@ class MicDisp(Display):
           cavNumA=''
           cavNumB=cavNumStr
 
-# Make the path name to be nice
+        # Make the path name to be nice
         LASTPATH=DATA_DIR_PATH+'ACCL_'+liNac+'_'+cmNumStr+cavNumStr[0]+'0'
 
         return liNac, cmNumStr, cavNumA, cavNumB
 
-# too scared to change ac = axis C? to top plot, ac2 is bottom plot
-    def setGOVal(self,ac,ac2):
-#        global lastPath
+# setGOVal is the response to the Get New Measurement button push
+# it takes GUI settings and calls python script to fetch the data
+#  then if Plotting is chosen, it calls getDataBack to make the plot
+
+    def setGOVal(self,tPlot,bPlot):
         global LASTPATH
-        global count
+#        global count
         return_code=2
-        liNac, cmNumSt, cavNumA, cavNumB = self.getUserVal()    # This gets the User inputs from the spinBox and checkboxes
-#                                                               # cmNumSt is a string of the cm number. cavNumA & B are strings of cavities chec$
+
+        # reads GUI inputs, fills out LASTPATH, and returns LxB, CMxx, and cav num
+        liNac, cmNumSt, cavNumA, cavNumB = self.getUserVal()    
 
         cavity=str(cavNumA + cavNumB)
 
-# instead of if lastPath, use if DEBUG while debugging
-#        if lastPath[48:50]==cmNumSt and lastPath[50:51] == cavity[0:1]:
-#        if LASTPATH[48:50]==cmNumSt and LASTPATH[50:51] == cavity[0:1]:
-        if DEBUG:
-# don't need the outputs, need the function to fill in LASTPATH
-            a,b,c,d=self.getUserVal()
-            self.getDataBack(ac,ac2)
+        # This was a check to make sure only one cavity was chosen and I'm too lazy to 
+        #  unindent the entire block that follows
 
-        else: 
-            if (len(cavNumA)+len(cavNumB))==2:                      # If sum of len of cavity num strings is 2, one of the strings has a cavity numb$
+        if (len(cavNumA)+len(cavNumB))==2:                      # If sum of len of cavity num strings is 2, one of the strings has a cavity numb$
 
-                timMeas = self.ui.spinBox.value()  # Get time for measurement from spinBox
-                count=timMeas+30
+            # Get time for measurement from spinbox
+            timMeas = self.ui.spinBox.value()  
+            count=timMeas+30
 
+            self.ui.AcqProg.setText("Data acquisition started\n")
+
+            resScrptSrce = "/usr/local/lcls/package/lcls2_llrf/srf/software/res_ctl/res_data_acq.py"
+            morPath = "/u1/lcls/physics/rf_lcls2/microphonics/"
+            s1 = datetime.now().strftime("%Y%m%d"+"_"+"%H%M%S")
+            botPath = "ACCL_"+liNac+"_"+cmNumSt
+
+            if cavNumA != '':
+                botPath = botPath+cavNumA[0]+"0/"+botPath+cavNumA[0]+"0_"+s1
+                caCmd = "ca://ACCL:"+liNac+":"+str(cmNumSt)+"00:RESA:"
+                cavNums=cavNumA
+
+            if cavNumB != '':
+               botPath = botPath+cavNumB[0]+"0/"+botPath+cavNumB[0]+"0_"+s1
+               caCmd = str("ca://ACCL:"+liNac+":"+str(cmNumSt)+"00:RESB:")
+               cavNums=cavNumB
+
+            # LASTPATH in this case ultimately looks like:
+            #  /u1/lcls/physics/rf_lcls2/microphonics/ACCL_L0B_0110/ACCL_L0B_0110_20220329_151328
+            #
+            LASTPATH =  path.join(morPath, botPath)
+            makedirs(LASTPATH, exist_ok=True)
+
+            numbWaveF= str(int(timMeas//8)+(timMeas % 8 > 0))
+            cmdList= ['python',resScrptSrce,'-D',str(LASTPATH),'-a',caCmd,'-wsp','2','-acav',str(cavNums),'-ch','DF','-c',numbWaveF]
+            print(cmdList)
+
+            try:
                 self.ui.AcqProg.setText("Data acquisition started\n")
+                process = subprocess.Popen(cmdList, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+                out, err = process.communicate()
+                return_code = process.poll()
+                out = out.decode(sys.stdin.encoding)
+                err = err.decode(sys.stdin.encoding)
+                print('Out: {}'.format(out))
 
-                resScrptSrce = "/usr/local/lcls/package/lcls2_llrf/srf/software/res_ctl/res_data_acq.py"
-#            resScrptSrce = "$PACKAGE_TOP/lcls2_llrf/srf/software/res_ctl/res_data_acq.py"
-#            morPath = "$PHYSICS_DATA/rf_lcls2/microphonics/"
-                morPath = "/u1/lcls/physics/rf_lcls2/microphonics/"
-                s1 = datetime.now().strftime("%Y%m%d"+"_"+"%H%M%S")
-                botPath = "ACCL_"+liNac+"_"+cmNumSt
+# success!
+                if return_code==0:
+                    self.ui.AcqProg.setText("File saved at \n"+LASTPATH)
+                    if indexPlot==1:
+                      try:
+                        dirs=listdir(LASTPATH)
+                        if dirs != []:
+                          fname=path.join(LASTPATH,dirs[0])
+                          self.getDataBack(fname,tPlot,bPlot)
+                      except:
+                        print('No data file found in {} to make plots from'.format(LASTPATH))
 
-                if cavNumA != '':
-                    botPath = botPath+cavNumA[0]+"0/"+botPath+cavNumA[0]+"0_"+s1
-                    caCmd = "ca://ACCL:"+liNac+":"+str(cmNumSt)+"00:RESA:"
-                    cavNums=cavNumA
-
-                if cavNumB != '':
-                   botPath = botPath+cavNumB[0]+"0/"+botPath+cavNumB[0]+"0_"+s1
-                   caCmd = str("ca://ACCL:"+liNac+":"+str(cmNumSt)+"00:RESB:")
-                   cavNums=cavNumB
-
-                LASTPATH =  path.join(morPath, botPath)
-                makedirs(LASTPATH, exist_ok=True)
-
-                numbWaveF= str(int(timMeas//8)+(timMeas % 8 > 0))
-                cmdList= ['python',resScrptSrce,'-D',str(LASTPATH),'-a',caCmd,'-wsp','2','-acav',str(cavNums),'-ch','DF','-c',numbWaveF]
-                print(cmdList)
-
-                try:
-                    self.ui.AcqProg.setText("Data acquisition started\n")
-                    process = subprocess.Popen(cmdList, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-                    out, err = process.communicate()
-                    return_code = process.poll()
-                    out = out.decode(sys.stdin.encoding)
-                    err = err.decode(sys.stdin.encoding)
-                    print('Out: {}'.format(out))
-
-                    if return_code==0:
-                        self.ui.AcqProg.setText("File saved at \n"+LASTPATH)
-                        if indexPlot==1:
-                          try:
-                            dirs=listdir(LASTPATH)
-                            if dirs != []:
-                              fname=path.join(LASTPATH,dirs[0])
-                              self.getDataBack(fname,ac,ac2)
-                          except:
-                            print('No data file found in {} to make plots from'.format(LASTPATH))
-
-                    else: #if return_code !=0:
-                        e = subprocess.CalledProcessError(return_code, cmdList, output=out)
-                        e.stdout, e.stderr = out, err
-                        self.ui.AcqProg.setText("Call to microphonics script failed \n"+str(e.stderr))
-                        print('stdout {0} stderr {1} return_code {2}'.format(e.stdout,e.stderr,return_code))
-                except:
-                    self.ui.AcqProg.setText("Call to microphonics script failed \n")  
+# unsuccess - if return_code != 0
+                else: 
+                    e = subprocess.CalledProcessError(return_code, cmdList, output=out)
+                    e.stdout, e.stderr = out, err
+                    self.ui.AcqProg.setText("Call to microphonics script failed \n"+str(e.stderr))
+                    print('stdout {0} stderr {1} return_code {2}'.format(e.stdout,e.stderr,return_code))
+            except:
+                self.ui.AcqProg.setText("Call to microphonics script failed \n")  
               
         return ()
 
-    def getOldData(self,ac,ac2):
+# This function prompts the user for a file with data to plot
+#  then calls getDataBack to plot it to axes tPlot and bPlot
+#  The inputs of tPlot and bPlot are passed through to getDataBack
+
+    def getOldData(self,tPlot,bPlot):
         global LASTPATH
-        global count
-        return_code=2
-        liNac, cmNumSt, cavNumA, cavNumB = self.getUserVal()    # This gets the User inputs from the spinBox and checkboxes
-#                                                               # cmNumSt is a string of the cm number. cavNumA & B are strings of cavities chec$
-        self.getDataBack(ac,ac2)
+
+        # clear message box in case there's anything still there
+        self.ui.AcqProg.setText("Choose previous data file.")
+        self.ui.AcqProg.adjustSize()
+
+        # getUserVal sets LASTPATH from user input on the GUI
+        liNac, cmNumSt, cavNumA, cavNumB = self.getUserVal()    
+
+        # fileDial is fun to say
+        fileDial=QFileDialog()
+        fname_tuple=fileDial.getOpenFileName(None,'Open File?',LASTPATH,'')
+        if fname_tuple[0]!='':
+          self.getDataBack(fname_tuple[0],tPlot,bPlot)
 
         return ()
     
-    def getDataBack(self,fname,ac,ac2):
-# assume we only call this if we want to plot something.
+
+# This function eats the data from filename fname and plots
+#  a waterfall plot to axis tPlot and an FFT to axis bPlot
+
+    def getDataBack(self,fname,tPlot,bPlot):
+
         cavDat1=[]
-        cavNumA=''
-        cavNumB=''          
 
         if path.exists(fname):
-            dFDat, throwAway = FFt_math.readCavDat(FilePlusPath)
+            dFDat, throwAway = FFt_math.readCavDat(fname)
             cavDat1,cavDat2,cavDat3,cavDat4 = FFt_math.parseCavDat(dFDat)
 
-# figure out cavity from filename
+            # figure out cavity from filename for legend
             idx=fname.find('res_cav')
             cavnum=fname[idx+7]
             
             leGend=[]
             leGend.append('Cav'+cavnum)
-            ac.axes.cla()
-            ac.axes.hist(cavDat1, bins=140,  histtype='step', log='True', edgecolor='b')
-            ac.axes.set_xlim(-20, 20)
-            ac.axes.set_ylim(bottom=1)
-            ac.axes.set_xlabel('Detune in Hz')
-            ac.axes.set_ylabel('Cnts')
-            ac.axes.grid(True)
-            ac.axes.legend(leGend)
-            ac.draw_idle()  
+            tPlot.axes.cla()
+            tPlot.axes.hist(cavDat1, bins=140,  histtype='step', log='True', edgecolor='b')
+            tPlot.axes.set_xlim(-20, 20)
+            tPlot.axes.set_ylim(bottom=1)
+            tPlot.axes.set_xlabel('Detune in Hz')
+            tPlot.axes.set_ylabel('Cnts')
+            tPlot.axes.grid(True)
+            tPlot.axes.legend(leGend)
+            tPlot.draw_idle()  
                
             leGend2=[]
             leGend2.append('Cav'+cavnum)
-            ac2.axes.cla()
-            self.FFTPlot(ac2,cavDat1)
-            ac.axes.set_xlim(0, 150)
-            ac.axes.set_xlabel('Freq, Hz')
-            ac.axes.set_ylabel('Rel Amplitude')
-            ac.axes.grid(True)
-            ac.axes.legend(leGend2)
-            ac.draw_idle()  
+            bPlot.axes.cla()
+            self.FFTPlot(bPlot,cavDat1)
+            bPlot.axes.set_xlim(0, 150)
+            bPlot.axes.set_xlabel('Freq, Hz')
+            bPlot.axes.set_ylabel('Rel Amplitude')
+            bPlot.axes.grid(True)
+            bPlot.axes.legend(leGend2)
+            bPlot.draw_idle()  
                      
             self.showDisplay(self.xfDisp)   
        
         else:
-            print('Couldn't find file {}'.format(fname))                 
+            print("Couldn't find file {}".format(fname))
         return
    
     def showDisplay(self, display):

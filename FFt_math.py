@@ -23,8 +23,8 @@ def readCavDat(fileName):
     f.close()
 
 #   debugging
-    print('read_data[0:2]')
-    print(read_data[0:5])
+#    print('read_data[0:2]')
+#    print(read_data[0:5])
     return(read_data, header_Data)
 # Number of sample points
 
@@ -37,16 +37,19 @@ def parseCavDat(read_data):
     cavDat4 = []
     for red in read_data:
         cavDat1.append(float(red[0:8]))
-        if red[10:18] != '':
-            cavDat2.append(float(red[10:18]))
-        if red[20:28] != '':
-            cavDat3.append(float(red[20:28]))
-        if red[30:38] != '':
-            cavDat4.append(float(red[30:38]))
+        try:
+            if red[10:18] != '':
+                cavDat2.append(float(red[10:18]))
+            if red[20:28] != '':
+                cavDat3.append(float(red[20:28]))
+            if red[30:38] != '':
+                cavDat4.append(float(red[30:38]))
+        except:
+            pass
 
 #print(cavDat3)
-    print('cavDat1[0:5]')
-    print(cavDat1[0:5])
+#    print('cavDat1[0:5]')
+#    print(cavDat1[0:5])
     return(cavDat1,cavDat2,cavDat3,cavDat4)
 
 
