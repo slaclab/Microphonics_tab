@@ -235,12 +235,7 @@
            </item>
            <item>
             <property name="text">
-             <string>WaterFall Plot</string>
-            </property>
-           </item>
-           <item>
-            <property name="text">
-             <string>FFT Plot</string>
+             <string>Plots</string>
             </property>
            </item>
           </widget>
