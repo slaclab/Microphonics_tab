@@ -23,6 +23,9 @@ from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg
 import matplotlib.pyplot as plt
 from matplotlib.figure import Figure
 
+# for ceil
+import math
+
 # FFt_math has utility functions
 import FFt_math
 
@@ -156,6 +159,9 @@ class MicDisp(Display):
 
         cavity=str(cavNumA + cavNumB)
 
+        indexPlot=self.ui.comboBox.currentIndex()
+#        print('indexPlot {}'.format(indexPlot))
+
         # This was a check to make sure only one cavity was chosen and I'm too lazy to 
         #  unindent the entire block that follows
 
@@ -188,7 +194,9 @@ class MicDisp(Display):
             LASTPATH =  path.join(morPath, botPath)
             makedirs(LASTPATH, exist_ok=True)
 
-            numbWaveF= str(int(timMeas//8)+(timMeas % 8 > 0))
+            # This kinda cheats... really just ceil of timMeas/8
+            #numbWaveF= str(timMeas//8 +int(timMeas % 8 > 0))
+            numbWaveF = str(math.ceil(timMeas/8))
             cmdList= ['python',resScrptSrce,'-D',str(LASTPATH),'-a',caCmd,'-wsp','2','-acav',str(cavNums),'-ch','DF','-c',numbWaveF]
             print(cmdList)
 
@@ -200,8 +208,10 @@ class MicDisp(Display):
                 out = out.decode(sys.stdin.encoding)
                 err = err.decode(sys.stdin.encoding)
                 print('Out: {}'.format(out))
+                self.ui.AcqProg.setText("{}".format(out))
 
 # success!
+#                print('about to if-else with return_code {}'.format(return_code))
                 if return_code==0:
                     self.ui.AcqProg.setText("File saved at \n"+LASTPATH)
                     if indexPlot==1:
@@ -217,7 +227,7 @@ class MicDisp(Display):
                 else: 
                     e = subprocess.CalledProcessError(return_code, cmdList, output=out)
                     e.stdout, e.stderr = out, err
-                    self.ui.AcqProg.setText("Call to microphonics script failed \n"+str(e.stderr))
+                    self.ui.AcqProg.setText("Call to microphonics script failed \nreturn code: {}\nstderr: {}".format(return_code,str(e.stderr)))
                     print('stdout {0} stderr {1} return_code {2}'.format(e.stdout,e.stderr,return_code))
             except:
                 self.ui.AcqProg.setText("Call to microphonics script failed \n")  
@@ -266,10 +276,13 @@ class MicDisp(Display):
             leGend.append('Cav'+cavnum)
             tPlot.axes.cla()
             tPlot.axes.hist(cavDat1, bins=140,  histtype='step', log='True', edgecolor='b')
-            tPlot.axes.set_xlim(-20, 20)
+            # put file name on the plot
+            parts=fname.split('/')
+            tPlot.axes.set_title(parts[-2][5:],loc='left',fontsize='small')
+            #tPlot.axes.set_xlim(-200, 200)
             tPlot.axes.set_ylim(bottom=1)
-            tPlot.axes.set_xlabel('Detune in Hz')
-            tPlot.axes.set_ylabel('Cnts')
+            tPlot.axes.set_xlabel('Detune (Hz)')
+            tPlot.axes.set_ylabel('Counts')
             tPlot.axes.grid(True)
             tPlot.axes.legend(leGend)
             tPlot.draw_idle()  
@@ -279,8 +292,8 @@ class MicDisp(Display):
             bPlot.axes.cla()
             self.FFTPlot(bPlot,cavDat1)
             bPlot.axes.set_xlim(0, 150)
-            bPlot.axes.set_xlabel('Freq, Hz')
-            bPlot.axes.set_ylabel('Rel Amplitude')
+            bPlot.axes.set_xlabel('Frequency (Hz)')
+            bPlot.axes.set_ylabel('Relative Amplitude')
             bPlot.axes.grid(True)
             bPlot.axes.legend(leGend2)
             bPlot.draw_idle()  

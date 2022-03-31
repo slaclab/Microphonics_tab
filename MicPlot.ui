@@ -49,7 +49,7 @@
          </size>
         </property>
         <property name="text">
-         <string>Microphonics Data Display - Waterfall Plot</string>
+         <string>Microphonics Data Display - Histogram</string>
         </property>
         <property name="alignment">
          <set>Qt::AlignCenter</set>
@@ -87,7 +87,7 @@
          </size>
         </property>
         <property name="text">
-         <string>Microphonics Data Display - FFT</string>
+         <string>FFT</string>
         </property>
         <property name="alignment">
          <set>Qt::AlignCenter</set>
