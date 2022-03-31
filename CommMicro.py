@@ -5,13 +5,13 @@ Created on Wed Aug  4 09:33:21 2021
 @author: bob
 """
 
+import sys
 from pydm import Display
-from PyQt5.QtGui import QStandardItem
+from PyQt5.QtGui import QStandardItem, QPixmap, QScreen
 from PyQt5.QtWidgets import (QWidgetItem, QCheckBox, QPushButton, QLineEdit,
                              QGroupBox, QHBoxLayout, QMessageBox, QWidget,
-                         QLabel, QFrame, QComboBox, QRadioButton,QFileDialog)
-from os import path, pardir, makedirs
-from os import listdir
+          QApplication,QLabel, QFrame, QComboBox, QRadioButton,QFileDialog)
+from os import path, pardir, makedirs, system, listdir
 import subprocess
 #from qtpy.QtCore import Slot, QTimer
 from functools import partial, reduce
@@ -67,6 +67,10 @@ class MicDisp(Display):
         # call function getOldData when OldDatBut is pressed
         self.ui.OldDatBut.clicked.connect(partial(self.getOldData,TopPlot,BotPlot))  
 
+        # This doesn't work yet.
+        # call function plotWindow when printPlot is pressed
+#        self.xfDisp.ui.printPlot.clicked.connect(self.plotWindow)
+
         # get CM IDs from FFt_math
         self.CM_IDs=FFt_math.CM_IDs()
 
@@ -76,6 +80,23 @@ class MicDisp(Display):
         for cavnum in range(8):
           self.ui.CavComboBox.addItem(str(cavnum+1))
 
+
+# This doesn't work yet
+# Function to print the window
+#    def plotWindow(self):
+#        fname='plot.png'
+#        app = QtWidgets.QApplication(sys.argv)
+#        screen = QtWidgets.QApplication.primaryScreen()
+#        screenshot = screen.grabWindow()
+#        QScreen.grabWindow(app.primaryScreen(),
+#          QApplication.desktop().winId()).save(fname,'png')
+#        if path.exists(fname) and path.getsize(fname):
+#            try:
+#                system('lpr -Pphysics-lcls2log '+fname)
+#            except:
+#                print('Unable to print {} with apologies'.format(fname))
+#        else:
+#            print('creation of {} failed'.format(fname))
 
 # This function takes given data (cavUno) and axis handle (tPlot) and calculates FFT and plots
     def FFTPlot(self, bPlot,cavUno):   
