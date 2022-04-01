@@ -175,6 +175,7 @@ class MicDisp(Display):
             count=timMeas+30
 
             self.ui.AcqProg.setText("Data acquisition started\n")
+            self.ui.AcqProg.repaint()
 
             resScrptSrce = "/usr/local/lcls/package/lcls2_llrf/srf/software/res_ctl/res_data_acq.py"
             morPath = "/u1/lcls/physics/rf_lcls2/microphonics/"
@@ -205,6 +206,7 @@ class MicDisp(Display):
 
             try:
                 self.ui.AcqProg.setText("Data acquisition started\n")
+                self.ui.AcqProg.repaint()
                 process = subprocess.Popen(cmdList, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
                 out, err = process.communicate()
                 return_code = process.poll()
@@ -212,11 +214,12 @@ class MicDisp(Display):
                 err = err.decode(sys.stdin.encoding)
                 print('Out: {}'.format(out))
                 self.ui.AcqProg.setText("{}".format(out))
-
+                self.ui.AcqProg.repaint()
 # success!
 #                print('about to if-else with return_code {}'.format(return_code))
                 if return_code==0:
                     self.ui.AcqProg.setText("File saved at \n"+LASTPATH)
+                    self.ui.AcqProg.repaint()
                     if indexPlot==1:
                       try:
                         dirs=listdir(LASTPATH)
@@ -231,9 +234,11 @@ class MicDisp(Display):
                     e = subprocess.CalledProcessError(return_code, cmdList, output=out)
                     e.stdout, e.stderr = out, err
                     self.ui.AcqProg.setText("Call to microphonics script failed \nreturn code: {}\nstderr: {}".format(return_code,str(e.stderr)))
+                    self.ui.AcqProg.repaint()
                     print('stdout {0} stderr {1} return_code {2}'.format(e.stdout,e.stderr,return_code))
             except:
                 self.ui.AcqProg.setText("Call to microphonics script failed \n")  
+                self.ui.AcqProg.repaint()
               
         return ()
 
