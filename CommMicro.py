@@ -77,6 +77,9 @@ class MicDisp(Display):
         # get CM IDs from FFt_math
         self.CM_IDs=FFt_math.CM_IDs()
 
+        # set spinbox to 10 to start
+        self.ui.spinBox.setValue(10)
+
         # fill combo boxes
         for cmid in self.CM_IDs:
           self.ui.CMComboBox.addItem(cmid)
