@@ -216,7 +216,7 @@ class MicDisp(Display):
             # Sergio had res_cav#_c#_yyyymmdd_hhmmss
             # Go to res_cm##_cav####_c#_yyyymmdd_hhmmss
             s1 = datetime.now().strftime("%Y%m%d"+"_"+"%H%M%S")
-            outFile = 'res_cm'+cmNumSt+'_cav'+cavNumStr+'_c'+str(numbWaveF)+'_'+s1
+            outFile = 'res_CM'+cmNumSt+'_cav'+cavNumStr+'_c'+str(numbWaveF)+'_'+s1
             cmdList= ['python',resScrptSrce,'-D',str(LASTPATH),'-a',caCmd,'-wsp','2','-acav',str(cavNums),'-ch','DF','-c',numbWaveF,'-F',outFile]
             print(cmdList)
 
