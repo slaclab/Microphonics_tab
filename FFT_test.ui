@@ -52,7 +52,7 @@
         </property>
         <layout class="QHBoxLayout" name="horizontalLayout_2">
          <item>
-          <widget class="QSpinBox" name="spinBox">
+          <widget class="QSpinBox" name="TimSpinBox">
            <property name="suffix">
             <string/>
            </property>
@@ -101,7 +101,7 @@
         <property name="minimumSize">
          <size>
           <width>259</width>
-          <height>41</height>
+          <height>80</height>
          </size>
         </property>
         <property name="frameShape">
@@ -111,10 +111,35 @@
          <enum>QFrame::Raised</enum>
         </property>
         <layout class="QGridLayout" name="gridLayout">
-         <item row="0" column="0">
-          <widget class="QComboBox" name="CavComboBox"/>
+         <item row="1" column="1">
+          <widget class="QCheckBox" name="cb2">
+           <property name="text">
+            <string>CheckBox</string>
+           </property>
+          </widget>
          </item>
-         <item row="0" column="2">
+         <item row="1" column="2">
+          <widget class="QCheckBox" name="cb3">
+           <property name="text">
+            <string>CheckBox</string>
+           </property>
+          </widget>
+         </item>
+         <item row="1" column="0">
+          <widget class="QCheckBox" name="cb1">
+           <property name="text">
+            <string>CheckBox</string>
+           </property>
+          </widget>
+         </item>
+         <item row="1" column="3">
+          <widget class="QCheckBox" name="cb4">
+           <property name="text">
+            <string>CheckBox</string>
+           </property>
+          </widget>
+         </item>
+         <item row="0" column="2" colspan="2">
           <widget class="QLabel" name="CavLabel">
            <property name="minimumSize">
             <size>
@@ -129,7 +154,17 @@
             </size>
            </property>
            <property name="text">
-            <string>Cavity to be measured</string>
+            <string>Cavity(ies) to be measured</string>
+           </property>
+          </widget>
+         </item>
+         <item row="0" column="0" colspan="2">
+          <widget class="QComboBox" name="CavComboBox">
+           <property name="minimumSize">
+            <size>
+             <width>0</width>
+             <height>30</height>
+            </size>
            </property>
           </widget>
          </item>
@@ -146,7 +181,7 @@
         </property>
         <layout class="QVBoxLayout" name="verticalLayout_3">
          <item alignment="Qt::AlignHCenter">
-          <widget class="QComboBox" name="comboBox">
+          <widget class="QComboBox" name="PlotComboBox">
            <property name="currentText">
             <string>No Plot</string>
            </property>

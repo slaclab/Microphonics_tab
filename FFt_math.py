@@ -15,9 +15,13 @@ read_data=[]
 def readCavDat(fileName):
     header_Data=[]
     with open(fileName) as f:
-# Bob had 28. Janice only sees 10
-        for lin in range(10):
-            header_Data.append(f.readline())
+        # watch for line to start with # ACCL
+        lini=f.readline()
+        while lini[0:3] != '# A':
+            header_Data.append(lini)
+            lini=f.readline()
+        # append the # ACCL line to the header
+        header_Data.append(lini)
         read_data = f.readlines()   
 
     f.close()
@@ -50,7 +54,12 @@ def parseCavDat(read_data):
 #print(cavDat3)
 #    print('cavDat1[0:5]')
 #    print(cavDat1[0:5])
-    return(cavDat1,cavDat2,cavDat3,cavDat4)
+#    print('cavDat2[0:5]')
+#    print(cavDat2[0:5])
+#    print('cavDat3[0:5]')
+#    print(cavDat3[0:5])
+
+    return([cavDat1,cavDat2,cavDat3,cavDat4])
 
 
 
