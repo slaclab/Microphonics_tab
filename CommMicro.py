@@ -3,6 +3,12 @@
 Created on Wed Aug  4 09:33:21 2021
 
 @author: bob
+
+J Nelson 4 Apr 2022
+new directory structure for data: 
+$DATA_DIR_PATH/ACCL_LxB_CM00/yyyy/mm/dd/filename
+
+add cm # to filename with -F switch
 """
 
 import sys
@@ -144,9 +150,16 @@ class MicDisp(Display):
           cavNumB=cavNumStr
 
         # Make the path name to be nice
-        LASTPATH=DATA_DIR_PATH+'ACCL_'+liNac+'_'+cmNumStr+cavNumStr[0]+'0'
+#        LASTPATH=DATA_DIR_PATH+'ACCL_'+liNac+'_'+cmNumStr+cavNumStr[0]+'0'
+        LASTPATH=path.join(DATA_DIR_PATH,'ACCL_'+liNac+'_'+cmNumStr+'00')
 
-        return liNac, cmNumStr, cavNumA, cavNumB
+        # get today's date as 2- or 4-char strings
+        year=str(datetime.now().year)
+        month='%02d' % datetime.now().month
+        day='%02d' % datetime.now().day
+        LASTPATH=path.join(LASTPATH,year,month,day)
+
+        return liNac, cmNumStr, cavNumA, cavNumB, cavNumStr[0]
 
 # setGOVal is the response to the Get New Measurement button push
 # it takes GUI settings and calls python script to fetch the data
@@ -158,7 +171,7 @@ class MicDisp(Display):
         return_code=2
 
         # reads GUI inputs, fills out LASTPATH, and returns LxB, CMxx, and cav num
-        liNac, cmNumSt, cavNumA, cavNumB = self.getUserVal()    
+        liNac, cmNumSt, cavNumA, cavNumB, cavNumStr = self.getUserVal()    
 
         cavity=str(cavNumA + cavNumB)
 
@@ -178,31 +191,35 @@ class MicDisp(Display):
             self.ui.AcqProg.repaint()
 
             resScrptSrce = "/usr/local/lcls/package/lcls2_llrf/srf/software/res_ctl/res_data_acq.py"
-            morPath = "/u1/lcls/physics/rf_lcls2/microphonics/"
-            s1 = datetime.now().strftime("%Y%m%d"+"_"+"%H%M%S")
-            botPath = "ACCL_"+liNac+"_"+cmNumSt
 
             if cavNumA != '':
-                botPath = botPath+cavNumA[0]+"0/"+botPath+cavNumA[0]+"0_"+s1
                 caCmd = "ca://ACCL:"+liNac+":"+str(cmNumSt)+"00:RESA:"
                 cavNums=cavNumA
 
             if cavNumB != '':
-               botPath = botPath+cavNumB[0]+"0/"+botPath+cavNumB[0]+"0_"+s1
                caCmd = str("ca://ACCL:"+liNac+":"+str(cmNumSt)+"00:RESB:")
                cavNums=cavNumB
 
             # LASTPATH in this case ultimately looks like:
             #  /u1/lcls/physics/rf_lcls2/microphonics/ACCL_L0B_0110/ACCL_L0B_0110_20220329_151328
-            #
-            LASTPATH =  path.join(morPath, botPath)
+            # /u1/lcls/physics/rf_lcls2/microphonics/ACCL_L0B_0100/yyyy/mm/dd/
+            # LASTPATH =  path.join(morPath, botPath)
+            # get LASTPATH from getUserVal()
             makedirs(LASTPATH, exist_ok=True)
 
             # This kinda cheats... really just ceil of timMeas/8
             #numbWaveF= str(timMeas//8 +int(timMeas % 8 > 0))
             numbWaveF = str(math.ceil(timMeas/8))
-            cmdList= ['python',resScrptSrce,'-D',str(LASTPATH),'-a',caCmd,'-wsp','2','-acav',str(cavNums),'-ch','DF','-c',numbWaveF]
+
+            # LASTPATH is the directory to put the datafile compliments of getUserVal()
+            # Need to make output file name
+            # Sergio had res_cav#_c#_yyyymmdd_hhmmss
+            # Go to res_cm##_cav####_c#_yyyymmdd_hhmmss
+            s1 = datetime.now().strftime("%Y%m%d"+"_"+"%H%M%S")
+            outFile = 'res_cm'+cmNumSt+'_cav'+cavNumStr+'_c'+str(numbWaveF)+'_'+s1
+            cmdList= ['python',resScrptSrce,'-D',str(LASTPATH),'-a',caCmd,'-wsp','2','-acav',str(cavNums),'-ch','DF','-c',numbWaveF,'-F',outFile]
             print(cmdList)
+
 
             try:
                 self.ui.AcqProg.setText("Data acquisition started\n")
