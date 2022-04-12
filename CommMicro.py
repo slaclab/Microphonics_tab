@@ -229,7 +229,8 @@ class MicDisp(Display):
         # Need to make output file name
         # Sergio had res_cav#_c#_yyyymmdd_hhmmss
         # Go to res_cm##_cav####_c#_yyyymmdd_hhmmss
-        s1 = self.startd.strftime("%Y%m%d"+"_"+"%H%M%S")
+        
+        s1 = datetime.now().strftime("%Y%m%d"+"_"+"%H%M%S")
         outFile = 'res_CM'+cmNumSt+'_cav'+cavNumStr+'_c'+str(numbWaveF)+'_'+s1
         # print(outFile)
         # print(cavNumStr)
@@ -262,7 +263,7 @@ class MicDisp(Display):
                 self.ui.AcqProg.repaint()
 
                 # user requesting that plots be made
-                if self.ui.PlotComboBox.currentIndex()==1:
+                if self.ui.PlotComboBox.currentIndex()==0:
                     try:
                         fname=path.join(LASTPATH,outFile)
                         if path.exists(fname):
