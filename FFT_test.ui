@@ -183,7 +183,7 @@
          <item alignment="Qt::AlignHCenter">
           <widget class="QComboBox" name="PlotComboBox">
            <property name="currentText">
-            <string>No Plot</string>
+            <string>Take Data and Plot</string>
            </property>
            <property name="currentIndex">
             <number>0</number>
@@ -193,12 +193,12 @@
            </property>
            <item>
             <property name="text">
-             <string>No Plot</string>
+             <string>Take Data and Plot</string>
             </property>
            </item>
            <item>
             <property name="text">
-             <string>Plots</string>
+             <string>Just Take Data</string>
             </property>
            </item>
           </widget>
