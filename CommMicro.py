@@ -87,9 +87,6 @@ class MicDisp(Display):
         # get CM IDs from FFt_math
         self.CM_IDs = FFt_math.CM_IDs()
 
-        # set spinbox to 10 to start
-        # self.ui.TimSpinBox.setValue(10)
-
         # fill combo boxes
         for cmid in self.CM_IDs:
             self.ui.CMComboBox.addItem(cmid)
@@ -168,7 +165,7 @@ class MicDisp(Display):
     def FFTPlot(self, bPlot, cavUno):
 
         N = len(cavUno)
-        T = 1.0 / 1000
+        T = 1.0 / (DEFAULT_SAMPLING_RATE / int(self.ui.comboBox_decimation.currentText()))
         yf1 = fft(cavUno)
         xf = fftfreq(N, T)[:N // 2]
         bPlot.axes.plot(xf, 2.0 / N * np.abs(yf1[0:N // 2]))
@@ -231,9 +228,6 @@ class MicDisp(Display):
         # reads GUI inputs, fills out LASTPATH, and returns LxB, CMxx, and cav num
         liNac, cmNumSt, cavNumStr = self.getUserVal()
 
-        # Get time for measurement from spinbox
-        # timMeas = self.ui.TimSpinBox.value()
-
         self.ui.AcqProg.setText("Data acquisition started\n")
         self.ui.AcqProg.repaint()
 
@@ -251,13 +245,9 @@ class MicDisp(Display):
         # get LASTPATH from getUserVal()
         makedirs(LASTPATH, exist_ok=True)
 
-        # This kinda cheats... really just ceil of timMeas/8
-        # numbWaveF= str(timMeas//8 +int(timMeas % 8 > 0))
-        # numbWaveF = str(math.ceil(timMeas / 8))
-
         numbWaveF = str(self.ui.spinBox_buffers.value())
 
-        wsp = str(self.ui.comboBox_decimation.currentText)
+        wsp = str(self.ui.comboBox_decimation.currentText())
 
         # LASTPATH is the directory to put the datafile compliments of getUserVal()
         # Need to make output file name
