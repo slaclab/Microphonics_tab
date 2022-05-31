@@ -11,7 +11,6 @@ $DATA_DIR_PATH/ACCL_LxB_CM00/yyyy/mm/dd/filename
 add cm # to filename with -F switch
 """
 
-# for ceil
 import subprocess
 import sys
 from datetime import datetime
@@ -34,17 +33,16 @@ BUFFER_LENGTH = 16384
 DEFAULT_SAMPLING_RATE = 2000
 
 LASTPATH = ''
-DEBUG = 1
 DATA_DIR_PATH = "/u1/lcls/physics/rf_lcls2/microphonics/"
 
 
 class MplCanvas(FigureCanvasQTAgg):
-    # MPLCanvas is the class for the 'canvas' that plots are drawn on and then mapped to the ui
-    # They are Figure format described in matplotlib 2.2 documentation
+    """ MPLCanvas is the class for the 'canvas' that plots are drawn on and then mapped to the ui
+        They are Figure format described in matplotlib 2.2 documentation """
 
     def __init__(self, parent=None, width=5, height=4, dpi=100):
         fig = Figure(figsize=(width, height), dpi=dpi, tight_layout="true")
-        # one axes per layout
+        # one axis per layout
         self.axes = fig.add_subplot(111)
         super(MplCanvas, self).__init__(fig)
 
@@ -64,21 +62,17 @@ class MicDisp(Display):
         # link up to the secondary display
         self.xfDisp = Display(ui_filename=getPath("MicPlot.ui"))
 
-        # Show message on gui
-        self.ui.AcqProg.setText(
-            "Select 1 CM and 1 cavity at a time for commissioning. \nLimit plotted waveforms to 30 sec.")
-
         # create plot canvases and link to GUI elements
-        TopPlot = MplCanvas(self, width=20, height=40, dpi=100)
-        BotPlot = MplCanvas(self, width=20, height=40, dpi=100)
-        self.xfDisp.ui.PlotTop.addWidget(TopPlot)
-        self.xfDisp.ui.PlotBot.addWidget(BotPlot)
+        topPlot = MplCanvas(self, width=20, height=40, dpi=100)
+        botPlot = MplCanvas(self, width=20, height=40, dpi=100)
+        self.xfDisp.ui.PlotTop.addWidget(topPlot)
+        self.xfDisp.ui.PlotBot.addWidget(botPlot)
 
         # call function setGOVal when strtBut is pressed
-        self.ui.StrtBut.clicked.connect(partial(self.setGOVal, TopPlot, BotPlot))
+        self.ui.StrtBut.clicked.connect(partial(self.setGOVal, topPlot, botPlot))
 
         # call function getOldData when OldDatBut is pressed
-        self.ui.OldDatBut.clicked.connect(partial(self.getOldData, TopPlot, BotPlot))
+        self.ui.OldDatBut.clicked.connect(partial(self.getOldData, topPlot, botPlot))
 
         # This doesn't work yet.
         # call function plotWindow when printPlot is pressed
@@ -118,12 +112,12 @@ class MicDisp(Display):
     def update_daq_setting(self):
 
         number_of_buffers = int(self.ui.spinBox_buffers.value())
-        decimation = int(self.ui.comboBox_decimation.currentText())
-        sampling_rate = DEFAULT_SAMPLING_RATE / decimation
+        decimation_num = int(self.ui.comboBox_decimation.currentText())
+        sampling_rate = DEFAULT_SAMPLING_RATE / decimation_num
         number_of_channels = self.counter
         self.ui.label_samplingrate.setNum(sampling_rate)
         self.ui.label_acq_time.setNum(
-            BUFFER_LENGTH * decimation * number_of_buffers / (sampling_rate * number_of_channels))
+            BUFFER_LENGTH * decimation_num * number_of_buffers / (sampling_rate * number_of_channels))
 
     @Slot(int)
     def update_counter(self, state):
@@ -143,23 +137,6 @@ class MicDisp(Display):
             delta = 5
         for idx, cb in enumerate(self.checkboxes):
             cb.setText(str(idx + delta))
-
-    # This doesn't work yet
-    # Function to print the window
-    #    def plotWindow(self):
-    #        fname='plot.png'
-    #        app = QtWidgets.QApplication(sys.argv)
-    #        screen = QtWidgets.QApplication.primaryScreen()
-    #        screenshot = screen.grabWindow()
-    #        QScreen.grabWindow(app.primaryScreen(),
-    #          QApplication.desktop().winId()).save(fname,'png')
-    #        if path.exists(fname) and path.getsize(fname):
-    #            try:
-    #                system('lpr -Pphysics-lcls2log '+fname)
-    #            except:
-    #                print('Unable to print {} with apologies'.format(fname))
-    #        else:
-    #            print('creation of {} failed'.format(fname))
 
     # This function takes given data (cavUno) and axis handle (tPlot) and calculates FFT and plots
     def FFTPlot(self, bPlot, cavUno):
@@ -187,7 +164,7 @@ class MicDisp(Display):
         cmid = self.ui.CMComboBox.currentText()
 
         # grab the LxB part
-        liNac = cmid.split(':')[1]
+        linac = cmid.split(':')[1]
 
         # grab the CM number
         cmNumStr = cmid.split(':')[2]
@@ -207,7 +184,7 @@ class MicDisp(Display):
 
         # Make the path name to be nice
         #        LASTPATH=DATA_DIR_PATH+'ACCL_'+liNac+'_'+cmNumStr+cavNumStr[0]+'0'
-        LASTPATH = path.join(DATA_DIR_PATH, 'ACCL_' + liNac + '_' + cmNumStr + '00')
+        LASTPATH = path.join(DATA_DIR_PATH, 'ACCL_' + linac + '_' + cmNumStr + '00')
 
         # get today's date as 2- or 4-char strings
         year = str(self.startd.year)
@@ -215,7 +192,7 @@ class MicDisp(Display):
         day = '%02d' % self.startd.day
         LASTPATH = path.join(LASTPATH, year, month, day)
 
-        return liNac, cmNumStr, cavNumStr
+        return linac, cmNumStr, cavNumStr
 
     # setGOVal is the response to the Get New Measurement button push
     # it takes GUI settings and calls python script to fetch the data
@@ -247,21 +224,21 @@ class MicDisp(Display):
 
         numbWaveF = str(self.ui.spinBox_buffers.value())
 
-        wsp = str(self.ui.comboBox_decimation.currentText())
+        decimation_str = str(self.ui.comboBox_decimation.currentText())
 
         # LASTPATH is the directory to put the datafile compliments of getUserVal()
         # Need to make output file name
         # Sergio had res_cav#_c#_yyyymmdd_hhmmss
         # Go to res_cm##_cav####_c#_yyyymmdd_hhmmss
 
-        s1 = datetime.now().strftime("%Y%m%d" + "_" + "%H%M%S")
-        outFile = 'res_CM' + cmNumSt + '_cav' + cavNumStr + '_c' + str(numbWaveF) + '_' + s1
+        timestamp = datetime.now().strftime("%Y%m%d" + "_" + "%H%M%S")
+        outFile = 'res_CM' + cmNumSt + '_cav' + cavNumStr + '_c' + str(numbWaveF) + '_' + timestamp
         # print(outFile)
         # print(cavNumStr)
 
         # cmdList= ['python',resScrptSrce,'-D',str(LASTPATH),'-a',caCmd,'-wsp','2','-acav',str(cavNums),'-ch','DF',
         # '-c',numbWaveF,'-F',outFile]
-        cmdList = ['python', resScrptSrce, '-D', str(LASTPATH), '-a', caCmd, '-wsp', wsp, '-acav']
+        cmdList = ['python', resScrptSrce, '-D', str(LASTPATH), '-a', caCmd, '-wsp', decimation_str, '-acav']
         for cav in cavNumStr:
             cmdList += cav
         cmdList += ['-ch', 'DF', '-c', numbWaveF, '-F', outFile]
@@ -281,8 +258,7 @@ class MicDisp(Display):
                 print('Err: {}'.format(err))
             self.ui.AcqProg.setText("{}".format(out))
             self.ui.AcqProg.repaint()
-            # success!
-            #                print('about to if-else with return_code {}'.format(return_code))
+
             if return_code == 0:
                 self.ui.AcqProg.setText("File saved at \n" + LASTPATH)
                 self.ui.AcqProg.repaint()

@@ -231,6 +231,16 @@
            </item>
           </widget>
          </item>
+         <item row="2" column="0" colspan="4">
+          <widget class="QLabel" name="label">
+           <property name="text">
+            <string>For longer acquisition time, increase the number of waveform buffers to be collected. Data decimation effectively lowers the sampling rate by the chosen factor.</string>
+           </property>
+           <property name="wordWrap">
+            <bool>true</bool>
+           </property>
+          </widget>
+         </item>
         </layout>
        </widget>
       </item>
@@ -285,19 +295,6 @@
           </layout>
          </item>
         </layout>
-       </widget>
-      </item>
-      <item>
-       <widget class="QLabel" name="AcqProg">
-        <property name="text">
-         <string/>
-        </property>
-        <property name="textFormat">
-         <enum>Qt::PlainText</enum>
-        </property>
-        <property name="scaledContents">
-         <bool>true</bool>
-        </property>
        </widget>
       </item>
      </layout>
