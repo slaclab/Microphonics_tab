@@ -145,6 +145,30 @@
          <string>DAQ setup</string>
         </property>
         <layout class="QGridLayout" name="gridLayout_2">
+         <item row="0" column="2">
+          <widget class="QLabel" name="label_6">
+           <property name="text">
+            <string>Sampling rate (Samples/sec):</string>
+           </property>
+          </widget>
+         </item>
+         <item row="1" column="2">
+          <widget class="QLabel" name="label_7">
+           <property name="text">
+            <string>Acquisition time (sec):</string>
+           </property>
+          </widget>
+         </item>
+         <item row="0" column="3">
+          <widget class="QLabel" name="label_samplingrate">
+           <property name="toolTip">
+            <string>Default sampling rate is 2kS/s, modified by selected data decimation</string>
+           </property>
+           <property name="text">
+            <string>TextLabel</string>
+           </property>
+          </widget>
+         </item>
          <item row="1" column="0">
           <widget class="QLabel" name="label_5">
            <property name="text">
@@ -159,13 +183,6 @@
            </property>
           </widget>
          </item>
-         <item row="1" column="2">
-          <widget class="QLabel" name="label_7">
-           <property name="text">
-            <string>Acquisition time (sec):</string>
-           </property>
-          </widget>
-         </item>
          <item row="0" column="1">
           <widget class="QSpinBox" name="spinBox_buffers">
            <property name="toolTip">
@@ -176,10 +193,26 @@
            </property>
           </widget>
          </item>
+         <item row="1" column="3">
+          <widget class="QLabel" name="label_acq_time">
+           <property name="toolTip">
+            <string>Acquisition time is dependent on number of buffers, data decimation and number of cavities selected</string>
+           </property>
+           <property name="text">
+            <string>TextLabel</string>
+           </property>
+          </widget>
+         </item>
          <item row="1" column="1">
           <widget class="QComboBox" name="comboBox_decimation">
            <property name="toolTip">
             <string>Reduces sampling rate, thus increases acquisition time</string>
+           </property>
+           <property name="currentText">
+            <string>2</string>
+           </property>
+           <property name="currentIndex">
+            <number>1</number>
            </property>
            <item>
             <property name="text">
@@ -196,33 +229,6 @@
              <string>4</string>
             </property>
            </item>
-          </widget>
-         </item>
-         <item row="0" column="2">
-          <widget class="QLabel" name="label_6">
-           <property name="text">
-            <string>Sampling rate (Samples/sec):</string>
-           </property>
-          </widget>
-         </item>
-         <item row="0" column="3">
-          <widget class="QLabel" name="label_samplingrate">
-           <property name="toolTip">
-            <string>Default sampling rate is 2kS/s, modified by selected data decimation</string>
-           </property>
-           <property name="text">
-            <string>TextLabel</string>
-           </property>
-          </widget>
-         </item>
-         <item row="1" column="3">
-          <widget class="QLabel" name="label_acq_time">
-           <property name="toolTip">
-            <string>Acquisition time is dependent on number of buffers, data decimation and number of cavities selected</string>
-           </property>
-           <property name="text">
-            <string>TextLabel</string>
-           </property>
           </widget>
          </item>
         </layout>
