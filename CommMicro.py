@@ -271,7 +271,8 @@ class MicDisp(Display):
 
             # unsuccess - if return_code != 0
             else:
-                print('return code is not0')
+                print('return code is not 0')
+
                 e = subprocess.CalledProcessError(return_code, cmdList, output=out)
                 e.stdout, e.stderr = out, err
                 self.ui.label_message.setText(
