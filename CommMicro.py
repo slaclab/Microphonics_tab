@@ -112,7 +112,7 @@ class MicDisp(Display):
     def update_daq_setting(self):
 
         number_of_buffers = int(self.ui.spinBox_buffers.value())
-        decimation_num = float(self.ui.comboBox_decimation.currentText())
+        decimation_num = int(self.ui.comboBox_decimation.currentText())
         sampling_rate = DEFAULT_SAMPLING_RATE / decimation_num
         self.ui.label_samplingrate.setNum(sampling_rate)
         self.ui.label_acq_time.setNum(
