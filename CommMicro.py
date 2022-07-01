@@ -9,22 +9,29 @@ new directory structure for data:
 $DATA_DIR_PATH/ACCL_LxB_CM00/yyyy/mm/dd/filename
 
 add cm # to filename with -F switch
-"""
 
+J Nelson 30 June 2022 
+add print to elog button
+
+"""
 import subprocess
 import sys
 from datetime import datetime
 from functools import partial
-from os import makedirs, path
+from os import makedirs, path,system
+import physicselog
+
 
 import numpy as np
 from PyQt5.QtCore import Qt
 from PyQt5.QtWidgets import (QFileDialog, QWidget)
+from PyQt5 import QtWidgets
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg
 from matplotlib.figure import Figure
 from pydm import Display
 from qtpy.QtCore import Slot
 from scipy.fftpack import fft, fftfreq
+from qtpy.QtGui import QPixmap
 
 # FFt_math has utility functions
 import FFt_math
@@ -74,9 +81,8 @@ class MicDisp(Display):
         # call function getOldData when OldDatBut is pressed
         self.ui.OldDatBut.clicked.connect(partial(self.getOldData, topPlot, botPlot))
 
-        # This doesn't work yet.
-        # call function plotWindow when printPlot is pressed
-        #        self.xfDisp.ui.printPlot.clicked.connect(self.plotWindow)
+        # call function plotWindow when printPushButton is pressed
+        self.xfDisp.ui.printPushButton.clicked.connect(self.plotWindow)
 
         # get CM IDs from FFt_math
         self.CM_IDs = FFt_math.CM_IDs()
@@ -232,6 +238,7 @@ class MicDisp(Display):
 
         timestamp = datetime.now().strftime("%Y%m%d" + "_" + "%H%M%S")
         outFile = 'res_CM' + cmNumSt + '_cav' + cavNumStr + '_c' + str(numbWaveF) + '_' + timestamp
+        self.filNam=outFile
 
         cmdList = ['python', resScrptSrce, '-D', str(LASTPATH), '-a', caCmd, '-wsp', decimation_str, '-acav']
         for cav in cavNumStr:
@@ -307,6 +314,12 @@ class MicDisp(Display):
         if fname_tuple[0] != '':
             self.getDataBack(fname_tuple[0], tPlot, bPlot)
 
+        # get file name for elog entry title
+        fnameParts=fname_tuple[0].split('/')
+        for part in fnameParts:
+          if part.startswith('res'):
+            self.filNam=part
+
         return ()
 
     # This function eats the data from filename fname and plots
@@ -373,3 +386,13 @@ class MicDisp(Display):
         display.raise_()
         # gives the display focus
         display.activateWindow()
+
+    def plotWindow(self):
+      screen = QtWidgets.QApplication.primaryScreen()
+      screenshot = screen.grabWindow(self.xfDisp.ui.frame.winId())
+      screenshot.save('/tmp/srf_micro.png','png')
+      system('convert /tmp/srf_micro.png /tmp/srf_micro.ps')
+
+      physicselog.submit_entry("lcls2","MicrophonicsGui",
+                               "Microphonics Data "+self.filNam,None,
+                               "/tmp/srf_micro.ps",None)
