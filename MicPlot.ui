@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>Form</class>
- <widget class="QWidget" name="Form">
+ <class>BigForm</class>
+ <widget class="QWidget" name="BigForm">
   <property name="geometry">
    <rect>
     <x>0</x>
@@ -28,6 +28,13 @@
      <layout class="QVBoxLayout" name="verticalLayout_2">
       <item>
        <layout class="QVBoxLayout" name="verticalLayout_4">
+        <item>
+         <widget class="QPushButton" name="printPushButton">
+          <property name="text">
+           <string>Print to lcls2elog</string>
+          </property>
+         </widget>
+        </item>
         <item>
          <widget class="QLabel" name="label">
           <property name="sizePolicy">
