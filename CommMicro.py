@@ -18,20 +18,18 @@ import subprocess
 import sys
 from datetime import datetime
 from functools import partial
-from os import makedirs, path,system
-import physicselog
-
+from os import makedirs, path, system
 
 import numpy as np
+import physicselog
+from PyQt5 import QtWidgets
 from PyQt5.QtCore import Qt
 from PyQt5.QtWidgets import (QFileDialog, QWidget)
-from PyQt5 import QtWidgets
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg
 from matplotlib.figure import Figure
 from pydm import Display
 from qtpy.QtCore import Slot
 from scipy.fftpack import fft, fftfreq
-from qtpy.QtGui import QPixmap
 
 # FFt_math has utility functions
 import FFt_math
@@ -238,7 +236,7 @@ class MicDisp(Display):
 
         timestamp = datetime.now().strftime("%Y%m%d" + "_" + "%H%M%S")
         outFile = 'res_CM' + cmNumSt + '_cav' + cavNumStr + '_c' + str(numbWaveF) + '_' + timestamp
-        self.filNam=outFile
+        self.filNam = outFile
 
         cmdList = ['python', resScrptSrce, '-D', str(LASTPATH), '-a', caCmd, '-wsp', decimation_str, '-acav']
         for cav in cavNumStr:
@@ -315,10 +313,10 @@ class MicDisp(Display):
             self.getDataBack(fname_tuple[0], tPlot, bPlot)
 
         # get file name for elog entry title
-        fnameParts=fname_tuple[0].split('/')
+        fnameParts = fname_tuple[0].split('/')
         for part in fnameParts:
-          if part.startswith('res'):
-            self.filNam=part
+            if part.startswith('res'):
+                self.filNam = part
 
         return ()
 
@@ -388,11 +386,11 @@ class MicDisp(Display):
         display.activateWindow()
 
     def plotWindow(self):
-      screen = QtWidgets.QApplication.primaryScreen()
-      screenshot = screen.grabWindow(self.xfDisp.ui.frame.winId())
-      screenshot.save('/tmp/srf_micro.png','png')
-      system('convert /tmp/srf_micro.png /tmp/srf_micro.ps')
+        screen = QtWidgets.QApplication.primaryScreen()
+        screenshot = screen.grabWindow(self.xfDisp.ui.frame.winId())
+        screenshot.save('/tmp/srf_micro.png', 'png')
+        system('convert /tmp/srf_micro.png /tmp/srf_micro.ps')
 
-      physicselog.submit_entry("lcls2","MicrophonicsGui",
-                               "Microphonics Data "+self.filNam,None,
-                               "/tmp/srf_micro.ps",None)
+        physicselog.submit_entry("lcls2", "MicrophonicsGui",
+                                 "Microphonics Data " + self.filNam, None,
+                                 "/tmp/srf_micro.ps", None)
