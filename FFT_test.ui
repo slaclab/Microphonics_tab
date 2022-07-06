@@ -199,10 +199,10 @@
             <string>Reduces sampling rate, thus increases acquisition time</string>
            </property>
            <property name="currentText">
-            <string>2</string>
+            <string>1</string>
            </property>
            <property name="currentIndex">
-            <number>1</number>
+            <number>0</number>
            </property>
            <item>
             <property name="text">
