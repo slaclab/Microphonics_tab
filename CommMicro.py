@@ -23,12 +23,10 @@ from os import makedirs, path, system
 import numpy as np
 import physicselog
 from PyQt5 import QtWidgets
-from PyQt5.QtCore import Qt
 from PyQt5.QtWidgets import (QFileDialog, QWidget)
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg
 from matplotlib.figure import Figure
 from pydm import Display
-from qtpy.QtCore import Slot
 from scipy.fftpack import fft, fftfreq
 
 # FFt_math has utility functions
@@ -101,17 +99,9 @@ class MicDisp(Display):
         # call function if cavity select combo box changes
         self.ui.CavComboBox.activated.connect(self.ChangeCav)
 
-        # initialize checkbox counter
-        self.num_channels = 1
-
         self.ui.comboBox_decimation.currentIndexChanged.connect(self.update_daq_setting)
         self.ui.spinBox_buffers.valueChanged.connect(self.update_daq_setting)
         self.update_daq_setting()
-
-        self.ui.cb1.stateChanged.connect(self.update_channel_counter)
-        self.ui.cb2.stateChanged.connect(self.update_channel_counter)
-        self.ui.cb3.stateChanged.connect(self.update_channel_counter)
-        self.ui.cb4.stateChanged.connect(self.update_channel_counter)
 
     def update_daq_setting(self):
 
@@ -120,15 +110,7 @@ class MicDisp(Display):
         sampling_rate = DEFAULT_SAMPLING_RATE / decimation_num
         self.ui.label_samplingrate.setNum(sampling_rate)
         self.ui.label_acq_time.setNum(
-            BUFFER_LENGTH * decimation_num * number_of_buffers / (DEFAULT_SAMPLING_RATE * self.num_channels))
-
-    @Slot(int)
-    def update_channel_counter(self, state):
-        if state == Qt.Unchecked:
-            self.num_channels -= 1
-        elif state == Qt.Checked:
-            self.num_channels += 1
-        self.update_daq_setting()
+            BUFFER_LENGTH * decimation_num * number_of_buffers / DEFAULT_SAMPLING_RATE)
 
     def ChangeCav(self):
         #   This function responds to a user changing the cavity combo box
