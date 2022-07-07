@@ -120,7 +120,7 @@ class MicDisp(Display):
         sampling_rate = DEFAULT_SAMPLING_RATE / decimation_num
         self.ui.label_samplingrate.setNum(sampling_rate)
         self.ui.label_acq_time.setNum(
-            BUFFER_LENGTH * decimation_num * number_of_buffers / (sampling_rate * self.num_channels))
+            BUFFER_LENGTH * decimation_num * number_of_buffers / (DEFAULT_SAMPLING_RATE * self.num_channels))
 
     @Slot(int)
     def update_channel_counter(self, state):
