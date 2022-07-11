@@ -21,7 +21,7 @@ from functools import partial
 from os import makedirs, path, system
 
 import numpy as np
-# import physicselog
+import physicselog
 from PyQt5 import QtWidgets
 from PyQt5.QtWidgets import (QFileDialog, QWidget)
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg

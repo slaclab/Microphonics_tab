@@ -17,9 +17,10 @@ def readCavDat(fileName):
     with open(fileName) as f:
         # watch for line to start with # ACCL
         lini = f.readline()
-        while lini[0] == '#':
+        while 'ACCL' not in lini:
             header_Data.append(lini)
             lini = f.readline()
+        next(f)
         # append the # ACCL line to the header
         header_Data.append(lini)
         read_data = f.readlines()
