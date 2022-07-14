@@ -21,6 +21,7 @@ def readCavDat(fileName):
             header_Data.append(lini)
             lini = f.readline()
         next(f)
+        next(f)
         # append the # ACCL line to the header
         header_Data.append(lini)
         read_data = f.readlines()
